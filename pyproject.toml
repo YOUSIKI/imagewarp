@@ -1,0 +1,37 @@
+[project]
+name = "image-warp"
+version = "0.1.0"
+description = "A simple image warping tool"
+authors = [
+    { name = "YouSiki", email = "you.siki@outlook.com" }
+]
+dependencies = [
+    "opencv-python>=4.10.0.84",
+    "numpy>=2.2.1",
+    "tyro>=0.9.5",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+imagewarp = "imagewarp.imagewarp:main"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/imagewarp"]
+
+[tool.pylint.typecheck]
+# List of members which are set dynamically and missed by pylint inference
+# system, and so shouldn't trigger E1101 when accessed. Python regular
+# expressions are accepted.
+generated-members = ["cv2.*"]
