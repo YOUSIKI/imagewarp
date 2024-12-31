@@ -1,3 +1,3 @@
-# spike-warp
+# Image Warp Tool
 
-Describe your project here.
+Warp images by drawing lines between corresponding points in two images.
