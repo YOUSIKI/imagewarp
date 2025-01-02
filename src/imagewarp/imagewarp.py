@@ -5,8 +5,8 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import tyro
 from cv2.typing import MatLike
+from tyro.extras import SubcommandApp
 
 
 class Window:
@@ -214,7 +214,11 @@ class Window:
         cv2.imwrite(str(self.output_path / "warped_concat.png"), concatenated)
 
 
-def imagewarp(output: Path, image_a: Path | None = None, image_b: Path | None = None):
+app = SubcommandApp()
+
+
+@app.command
+def draw(output: Path, image_a: Path | None = None, image_b: Path | None = None):
     """Draw lines between corresponding points to warp images.
 
     Args:
@@ -225,9 +229,34 @@ def imagewarp(output: Path, image_a: Path | None = None, image_b: Path | None = 
     Window(output_path=output, image_a_path=image_a, image_b_path=image_b)
 
 
+@app.command
+def apply(image_a: Path, image_b: Path, homography: Path, output: Path):
+    """Apply the homography to warp the second image to the first image.
+
+    Args:
+        image_a (Path): the first image
+        image_b (Path): the second image
+        homography (Path): the homography
+        output (Path): the output file to save the warped image
+    """
+    image_a = cv2.imread(str(image_a), cv2.IMREAD_COLOR)
+    image_b = cv2.imread(str(image_b), cv2.IMREAD_COLOR)
+    # Resize image_b to the same height as image_a while keeping the aspect ratio
+    height_a, _, _ = image_a.shape
+    height_b, width_b, _ = image_b.shape
+    height_b, width_b = height_a, int(width_b * height_a / height_b)
+    image_b = cv2.resize(image_b, (width_b, height_b))
+    homography = np.load(homography)
+    warped_b = cv2.warpPerspective(
+        image_b, homography, (image_a.shape[1], image_a.shape[0])
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(output), warped_b)
+
+
 def main():
     """Entrypoint."""
-    tyro.cli(imagewarp)
+    app.cli()
 
 
 if __name__ == "__main__":
